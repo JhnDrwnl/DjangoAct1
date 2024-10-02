@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Men Avenue - Products</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        .product-img {
+            height: 200px;
+            object-fit: cover;
+        }
+        .nav-link i {
+            margin-right: 5px;
+        }
+        .cart-link {
+            position: relative;
+        }
+        .cart-count {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background-color: red;
+            color: white;
+            border-radius: 50%;
+            padding: 0.2em 0.5em;
+            font-size: 0.7em;
+            min-width: 1.5em;
+            text-align: center;
+        }
+        .sale-badge {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: red;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <div class="container">
+            <a class="navbar-brand" href="{% url 'MenAvenue' %}"><i class="bi bi-shop"></i> Men Avenue</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'MenAvenue' %}"><i class="bi bi-house-door"></i> Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'products' %}"><i class="bi bi-grid"></i> Products</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link cart-link" href="{% url 'cart' %}">
+                            <i class="bi bi-cart"></i> Cart
+                            <span class="cart-count" id="cartCount">0</span>
+                        </a>
+                    </li>
+                </ul>
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" href="#login"><i class="bi bi-box-arrow-in-right"></i> Login</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#signup"><i class="bi bi-person-plus"></i> Sign Up</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <h1 class="mb-4">Our Products</h1>
+        <div class="row" id="product-list">
+            <!-- Products will be dynamically added here -->
+        </div>
+    </div>
+
+    <footer class="bg-light mt-5 py-3">
+        <div class="container text-center">
+            <p>&copy; 2023 Men Avenue. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <!-- Add this toast container for notifications -->
+    <div class="toast-container position-fixed bottom-0 end-0 p-3">
+        <div id="cartToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="toast-header">
+                <strong class="me-auto">Cart Update</strong>
+                <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+            <div class="toast-body">
+                Item added to cart!
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Sample product data
+        const products = [
+            { id: 1, name: 'Classic White Shirt', price: 350.00, image: 'https://images.bewakoof.com/original/white-half-sleeve-t-shirt-men-s-plain-t-shirts-105-1583992780.jpg' },
+            { id: 2, name: 'Slim Fit Jeans', price: 400.40, originalPrice: 380.00, sale: true, image: 'https://s7d2.scene7.com/is/image/aeo/0116_6494_432_of?$pdp-m-opt$' },
+            { id: 3, name: 'Leather Jacket', price: 1049.80, image: 'https://i.pinimg.com/736x/ae/52/79/ae52791f4c03d1f3b30567d88d24c219.jpg' },
+            { id: 4, name: 'Casual T-Shirt', price: 390.60, image: 'https://th.bing.com/th/id/OIP.a8fPrvxT4l8zDGUxPBaZ3gAAAA?rs=1&pid=ImgDetMain' },
+            { id: 5, name: 'Formal Suit', price: 299.99, image: 'https://th.bing.com/th/id/OIP.qi8rFJ_WfqlcBOJEXmTzugHaLG?rs=1&pid=ImgDetMain' },
+            { id: 6, name: 'Sneakers', price: 2499.88, image: 'https://th.bing.com/th/id/R.3f4d367729da599332f0093ea786a206?rik=ZdeM42QhkPe9Lg&riu=http%3a%2f%2fimage.sportsmansguide.com%2fadimgs%2fl%2f1%2f125540_ts.jpg&ehk=XMZP1%2buKXT2muHWpuCSAQR0aCh0x6G6Nuq9v2RXboK4%3d&risl=&pid=ImgRaw&r=0' },
+        ];
+
+        // Cart data
+        let cart = JSON.parse(localStorage.getItem('cart')) || [];
+
+        // Function to display products
+        function displayProducts() {
+    const productList = document.getElementById('product-list');
+    productList.innerHTML = '';
+    products.forEach(product => {
+        const productElement = document.createElement('div');
+        productElement.className = 'col-md-4 mb-4';
+        productElement.innerHTML = `
+            <div class="card">
+                ${product.sale ? '<div class="sale-badge">SALE</div>' : ''}
+                <img src="${product.image}" class="card-img-top product-img" alt="${product.name}">
+                <div class="card-body">
+                    <h5 class="card-title">${product.name}</h5>
+                    <p class="card-text">
+                        ${product.sale 
+                            ? `<s>₱${product.originalPrice.toFixed(2)}</s> <strong class="text-danger">₱${product.price.toFixed(2)}</strong>`
+                            : `₱${product.price.toFixed(2)}`
+                        }
+                    </p>
+                    <a href="#" class="btn btn-primary add-to-cart" data-id="${product.id}">Add to Cart</a>
+                </div>
+            </div>
+        `;
+        productList.appendChild(productElement);
+    });
+}
+
+
+        // Function to update cart
+        function updateCart() {
+            const cartCount = document.getElementById('cartCount');
+            const count = cart.reduce((total, item) => total + item.quantity, 0);
+            cartCount.textContent = count;
+            cartCount.style.display = count > 0 ? 'inline' : 'none';
+            localStorage.setItem('cart', JSON.stringify(cart));
+        }
+
+        // Function to show notification
+        function showNotification(message) {
+            const toastBody = document.querySelector('#cartToast .toast-body');
+            toastBody.textContent = message;
+            const toast = new bootstrap.Toast(document.getElementById('cartToast'));
+            toast.show();
+        }
+
+        // Event listeners
+        document.addEventListener('DOMContentLoaded', () => {
+            displayProducts();
+            updateCart();
+
+            // Add to cart
+            document.addEventListener('click', function(e) {
+                if (e.target && e.target.classList.contains('add-to-cart')) {
+                    e.preventDefault();
+                    const productId = parseInt(e.target.getAttribute('data-id'));
+                    const product = products.find(p => p.id === productId);
+                    const existingItem = cart.find(item => item.id === productId);
+                    if (existingItem) {
+                        existingItem.quantity += 1;
+                    } else {
+                        cart.push({ id: productId, quantity: 1 });
+                    }
+                    updateCart();
+                    showNotification(`${product.name} added to cart!`);
+                }
+            });
+        });
+    </script>
+</body>
+</html>
