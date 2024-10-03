@@ -22,5 +22,5 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('firstapp/', include('ecommerce.urls')),
     path('secondapp/', include('trackOrders.urls')),
-    path('', RedirectView.as_view(url = '/ecommerce/'))
+    path('', RedirectView.as_view(url = '/firstapp/'))
 ]
